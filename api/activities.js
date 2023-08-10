@@ -20,6 +20,24 @@ router.get('/:activityId/routines', async (req, res, next) => {
   }
 });
 
+
+router.get('/:activityId', async (req, res, next) => {
+  try{
+    console.log(req.params.activityId)
+    const activity = await getActivityById(req.params.activityId);
+    if(activity) {
+      res.send(activity);
+    } else {
+      next({
+        name: 'NotFound',
+        message: `No id found for the Activity ${req.params.activityId}`
+      })
+    }}
+    catch (error) {
+      next(error);
+    }
+});
+
 // GET /api/activities
 router.get('/', async (req, res, next) => {
   try {
@@ -56,6 +74,8 @@ router.post('/', requireUser, requiredNotSent({requiredParams: ['name', 'descrip
   }
 });
 
+
+
 // PATCH /api/activities/:activityId
 router.patch('/:activityId', requireUser, requiredNotSent({requiredParams: ['name', 'description'], atLeastOne: true}), async (req, res, next) => {
   try {
@@ -82,5 +102,32 @@ router.patch('/:activityId', requireUser, requiredNotSent({requiredParams: ['nam
     next(error);
   }
 });
+
+router.patch('/: getPublicRoutinesByActivity', requireUser, requiredNotSent({requiredParams: ['name', 'description'], atLeastOne: true}), async (req, res, next) => {
+  try {
+    const {activityId} = req.params;
+    const existingActivity = await  getPublicRoutinesByActivity(activityId);
+    if(!existingActivity) {
+      next({
+        name: 'NotFound',
+        message: `No activity by ID ${activityId}`
+      });
+    } else {
+      const {name, description} = req.body;
+      const updatedActivity = await updateActivity({id: activityId, name, description})
+      if(updatedActivity) {
+        res.send(updatedActivity);
+      } else {
+        next({
+          name: 'FailedToUpdate',
+          message: 'There was an error updating your activity'
+        })
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 module.exports = router;

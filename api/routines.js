@@ -16,6 +16,23 @@ router.get('/', async (req, res, next) => {
   }
 })
 
+router.get('/:getRoutineById', async (req, res, next) => {
+  try{
+    console.log(req.params.getRoutineById)
+    const Routine = await getRoutineById(req.params.getRoutineById);
+    if(Routine) {
+      res.send(Routine);
+    } else {
+      next({
+        name: 'NotFound',
+        message: `No id found for the Routine ${req.params.getRoutineById}`
+      })
+    }}
+    catch (error) {
+      next(error);
+    }
+});
+
 // POST /api/routines
 router.post('/', requireUser, requiredNotSent({requiredParams: ['name', 'goal']}), async (req, res, next) => {
   try {
